@@ -9,6 +9,11 @@ const {
   removeVehicleAuthorization 
 } = require('../services/vehicleService');
 const { VehiclesService } = require('../services/vehicleService');
+const { 
+  buildAuthUrl: buildStravaAuthUrl, 
+  handleCallback: handleStravaCallback,
+  isAuthed: isStravaAuthed 
+} = require('../services/stravaService');
 const { getServiceStatuses } = require('../lib/dataBuilder');
 const { getStateKey } = require('../lib/state');
 
@@ -216,6 +221,60 @@ router.delete('/admin/vehicles/:vehicleId', async (req, res) => {
     res.status(200).json({ ok: true });
   } catch (e) {
     console.error('Error removing vehicle:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ===== Strava OAuth =====
+
+/**
+ * GET /auth/strava/status - Check if Strava is authenticated
+ */
+router.get('/auth/strava/status', (req, res) => {
+  try {
+    const authed = isStravaAuthed();
+    res.status(200).json({ authed });
+  } catch (e) {
+    res.status(500).json({ authed: false, error: e.message });
+  }
+});
+
+/**
+ * GET /auth/strava - Start Strava OAuth flow
+ */
+router.get('/auth/strava', (req, res) => {
+  try {
+    const url = buildStravaAuthUrl(getBaseUrl(req));
+    res.redirect(url);
+  } catch (e) {
+    console.error('Failed to start Strava OAuth:', e);
+    res.status(500).json({ error: 'Failed to start Strava OAuth', details: e.message });
+  }
+});
+
+/**
+ * GET /auth/strava/callback - Strava OAuth callback
+ */
+router.get('/auth/strava/callback', async (req, res) => {
+  try {
+    const code = req.query.code;
+    if (!code) return res.status(400).json({ error: 'Missing code param' });
+    await handleStravaCallback(code, getBaseUrl(req));
+    res.redirect('/admin');
+  } catch (e) {
+    console.error('Strava OAuth callback error:', e);
+    res.status(500).json({ error: 'Strava OAuth callback failed', details: e.message });
+  }
+});
+
+/**
+ * GET /auth/strava/signout - Sign out of Strava
+ */
+router.get('/auth/strava/signout', (req, res) => {
+  try {
+    deleteAuthSection('strava');
+    res.redirect('/admin');
+  } catch (e) {
     res.status(500).json({ error: e.message });
   }
 });

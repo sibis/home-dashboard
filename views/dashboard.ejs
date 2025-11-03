@@ -369,21 +369,42 @@
       </div>
     </div>
     
-    <div class="flex flex-col" style="justify-content: space-between">
-      <% 
-      // Show up to 3 additional locations (indices 1, 2, and 3)
-      for (let i = 1; i <= 3; i++) {
-        if (i < locations.length) {
-      %>
-      <div class="flex items-center text-label">
-        <div class="flex-1"><%= locations[i].name %></div>
-        <i class="ph-bold icon-sm <%= getWeatherIcon(locations[i].icon, false) %>" style="margin-right: 6px;"></i>
-        <%= Math.round(locations[i].current_temp) %>°
-      </div>
-      <%
+    <div class="flex flex-col" style="justify-content: space-between; height: 100%; overflow: hidden;">
+      <% if (strava && strava.week_distance_km != null) { %>
+        <!-- Strava Running Stats -->
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <!-- This Week -->
+          <div class="flex items-center text-label">
+            <i class="ph-bold ph-sneaker" style="margin-right: 6px;"></i>
+            <div class="flex-1">This Week</div>
+            <div style="font-weight: 600;"><%= strava.week_distance_km %>km · <%= strava.total_runs_this_week %> run<%= strava.total_runs_this_week !== 1 ? 's' : '' %></div>
+          </div>
+          <% if (strava.last_run) { %>
+            <!-- Last Run with Pace -->
+            <div class="flex items-center text-label" style="gap: 8px;">
+              <i class="ph-bold ph-flag-checkered" style="margin-right: 6px;"></i>
+              <div class="flex-1">Last Run</div>
+              <div style="white-space: nowrap;"><%= strava.last_run.distance_km %>km<% if (strava.last_run.pace_per_km) { %> · <%= strava.last_run.pace_per_km %>/km<% } %></div>
+            </div>
+          <% } %>
+        </div>
+      <% } else { %>
+        <!-- Additional Locations (fallback when no Strava data) -->
+        <% 
+        // Show up to 3 additional locations (indices 1, 2, and 3)
+        for (let i = 1; i <= 3; i++) {
+          if (i < locations.length) {
+        %>
+        <div class="flex items-center text-label">
+          <div class="flex-1"><%= locations[i].name %></div>
+          <i class="ph-bold icon-sm <%= getWeatherIcon(locations[i].icon, false) %>" style="margin-right: 6px;"></i>
+          <%= Math.round(locations[i].current_temp) %>°
+        </div>
+        <%
+          }
         }
-      }
-      %>
+        %>
+      <% } %>
     </div>
   </div>
   

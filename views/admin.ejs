@@ -27,11 +27,20 @@
           </div>
           <a class="btn-secondary" href="/auth/smartcar">Add Car</a>
         </div>
+
+        <div class="card">
+          <h2>Strava Running Stats</h2>
+          <div id="strava-auth-status" class="auth-status">
+            <span class="loading">Checking authentication...</span>
+          </div>
+          <div id="strava-content"></div>
+        </div>
       </div>
       
       <div class="admin-sidebar">
         <div id="services-content">
           <div class="loading">Loading services...</div>
+        </div>
       </div>
     </div>
   </div>
@@ -66,6 +75,8 @@
     const calAuthStatus = document.getElementById('cal-auth-status');
     const calContent = document.getElementById('cal-content');
     const vehContent = document.getElementById('veh-content');
+    const stravaAuthStatus = document.getElementById('strava-auth-status');
+    const stravaContent = document.getElementById('strava-content');
 
     async function checkCalendarAuth() {
       try {
@@ -155,6 +166,25 @@
         loadVehicles();
       } catch (e) {
         alert('Failed to remove vehicle: ' + e.message);
+      }
+    }
+
+    async function checkStravaAuth() {
+      try {
+        const status = await fetchJSON('/auth/strava/status');
+        if (status.authed) {
+          stravaAuthStatus.innerHTML = `
+            <span style="color: #16a34a;">✓ Connected</span>
+            <a href="/auth/strava/signout" class="btn-secondary">Disconnect</a>
+          `;
+          stravaContent.innerHTML = '<div style="color: #6b7280; font-size: 14px; margin-top: 8px;">Your running stats will appear on the dashboard.</div>';
+        } else {
+          stravaAuthStatus.innerHTML = '<a href="/auth/strava" class="btn-secondary">Connect to Strava</a>';
+          stravaContent.innerHTML = '<div style="color: #6b7280; font-size: 14px; margin-top: 8px;">Connect your Strava account to display weekly running distance, total runs, and last run stats on the dashboard.</div>';
+        }
+      } catch (e) {
+        stravaAuthStatus.innerHTML = '<a href="/auth/strava" class="btn-secondary">Connect to Strava</a>';
+        stravaContent.innerHTML = '<div style="color: #dc2626; font-size: 14px; margin-top: 8px;">Make sure STRAVA_CLIENT_ID and STRAVA_CLIENT_SECRET are set in .env</div>';
       }
     }
 
@@ -279,6 +309,7 @@
     document.addEventListener('DOMContentLoaded', function() {
       checkCalendarAuth();
       loadVehicles();
+      checkStravaAuth();
       loadServices();
       
       // Auto-refresh services status every 30 seconds

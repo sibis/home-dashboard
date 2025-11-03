@@ -2,7 +2,7 @@
 /**
  * Test individual services - shows actual output
  * Usage: npm run test:service <service-name>
- * Services: weather, ambient, calendar, vehicle, llm
+ * Services: weather, ambient, calendar, vehicle, llm, strava
  */
 
 require('dotenv').config();
@@ -13,6 +13,7 @@ const services = {
   calendar: () => require('../services/calendarService').CalendarService,
   vehicle: () => require('../services/vehicleService').VehiclesService,
   llm: () => require('../services/llmService').LLMService,
+  strava: () => require('../services/stravaService').StravaService,
 };
 
 const logger = {
