@@ -126,22 +126,28 @@ class AmbientService extends BaseService {
     const rainRate = Number(apiData.rainratein) || 0;
     const solarRadiation = Number(apiData.solarradiation) || 0;
 
+    // Convert to metric units
+    const tempC = (tempF - 32) * 5 / 9;
+    const feelsLikeC = (feelsLikeF - 32) * 5 / 9;
+    const windSpeedKph = windSpeedMph * 1.60934;
+    const pressureMb = pressureInHg * 33.8639;
+    
     const windDirection = getWindDirection(windDir);
 
     return {
-      current_temp: Math.round(tempF * 10) / 10,
-      feels_like: Math.round(feelsLikeF * 10) / 10,
+      current_temp: Math.round(tempC * 10) / 10,
+      feels_like: Math.round(feelsLikeC * 10) / 10,
       humidity: Math.round(humidity),
-      pressure: Math.round(pressureInHg * 100) / 100,
+      pressure: Math.round(pressureMb * 100) / 100,
       wind: {
-        speed_mph: Math.round(windSpeedMph * 10) / 10,
+        speed_kph: Math.round(windSpeedKph * 10) / 10,
         direction: windDirection,
       },
       precipitation: {
-        last_24h_in: Math.round(Number(apiData.dailyrainin || 0) * 100) / 100,
-        week_total_in: Math.round(Number(apiData.weeklyrainin || 0) * 100) / 100,
-        month_total_in: Math.round(Number(apiData.monthlyrainin || 0) * 100) / 100,
-        year_total_in: Math.round(Number(apiData.yearlyrainin || 0) * 100) / 100,
+        last_24h_mm: Math.round(Number(apiData.dailyrainin || 0) * 25.4 * 100) / 100,
+        week_total_mm: Math.round(Number(apiData.weeklyrainin || 0) * 25.4 * 100) / 100,
+        month_total_mm: Math.round(Number(apiData.monthlyrainin || 0) * 25.4 * 100) / 100,
+        year_total_mm: Math.round(Number(apiData.yearlyrainin || 0) * 25.4 * 100) / 100,
       },
     };
   }

@@ -164,7 +164,7 @@ class CalendarService extends BaseService {
 }
 
 // OAuth helper functions for server.js
-const service = new CalendarService();
+const service = new CalendarService(5); // 5 minute cache
 
 function buildAuthUrl(baseUrl) {
   const oauth2Client = service.getOAuthClient(baseUrl);

@@ -204,7 +204,7 @@ Remember:
 
     const userMessage = `Today is ${month} ${day}. It is ${timeContext.period.toUpperCase()}, ${time}. Planning for ${timeContext.planningFocus}
 
-CURRENT WEATHER: ${current?.temp_f}°F, ${current?.description}
+CURRENT WEATHER: ${current?.temp_c}°C, ${current?.description}
 ${weatherContext.dailyInfo}
 
 HOURLY FORECAST:
@@ -229,20 +229,20 @@ ${weatherContext.hourlyData}${weatherContext.contextNotes ? '\n\nNOTES: ' + weat
 
     // Hourly data
     context.hourlyData = relevantHourly
-      .map(h => `${h.time}: ${h.temp_f}° ${h.condition.trim()}${h.rain_chance > 0 ? ` (${h.rain_chance}%)` : ''}`)
+      .map(h => `${h.time}: ${h.temp_c}° ${h.condition.trim()}${h.rain_chance > 0 ? ` (${h.rain_chance}%)` : ''}`)
       .join('\n');
 
     // Temperature swing
-    const temps = relevantHourly.map(h => h.temp_f);
+    const temps = relevantHourly.map(h => h.temp_c);
     const tempRange = Math.max(...temps) - Math.min(...temps);
-    if (tempRange >= 15) {
+    if (tempRange >= 8) {
       context.contextNotes.push(`${tempRange}° temperature swing`);
     }
 
     // Wind
-    const maxWind = Math.max(...relevantHourly.map(h => h.wind_mph || 0));
-    if (maxWind >= 12) {
-      context.contextNotes.push(`Windy, gusts ${maxWind} mph`);
+    const maxWind = Math.max(...relevantHourly.map(h => h.wind_kph || 0));
+    if (maxWind >= 20) {
+      context.contextNotes.push(`Windy, gusts ${maxWind} km/h`);
     }
 
     // Humidity extremes
@@ -298,14 +298,14 @@ ${weatherContext.hourlyData}${weatherContext.contextNotes ? '\n\nNOTES: ' + weat
     }
 
     // Heat advisory
-    const hotHours = relevantHourly.filter(h => h.temp_f >= 90);
+    const hotHours = relevantHourly.filter(h => h.temp_c >= 32);
     if (hotHours.length >= 2) {
       context.contextNotes.push(`Heat peak ${hotHours[0].time}-${hotHours[hotHours.length-1].time}`);
     }
 
     // Feels-like delta - when significantly different
-    if (current?.feels_like_f && Math.abs(current.temp_f - current.feels_like_f) >= 5) {
-      const delta = current.feels_like_f - current.temp_f;
+    if (current?.feels_like_c && Math.abs(current.temp_c - current.feels_like_c) >= 3) {
+      const delta = current.feels_like_c - current.temp_c;
       context.contextNotes.push(`Feels ${delta > 0 ? 'warmer' : 'cooler'} (${Math.abs(delta)}° diff)`);
     }
 

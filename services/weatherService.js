@@ -27,7 +27,7 @@ class WeatherService extends BaseService {
     // Visual Crossing uses location/next{days}days format for forecast
     const url = new URL(`https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(zip)}/next${days}days`);
     url.searchParams.set('key', apiKey);
-    url.searchParams.set('unitGroup', 'us'); // Use US units (Fahrenheit, mph, inches)
+    url.searchParams.set('unitGroup', 'metric'); // Use metric units (Celsius, km/h, mm)
     url.searchParams.set('include', 'days,hours,current,alerts');
     // Include air quality elements: aqius (US EPA AQI) and pm2p5 (PM2.5)
     url.searchParams.set('elements', 'datetime,tempmax,tempmin,temp,feelslike,feelslikemax,feelslikemin,humidity,precip,precipprob,preciptype,snow,snowdepth,windspeed,winddir,pressure,cloudcover,visibility,solarradiation,solarenergy,uvindex,sunrise,sunset,moonphase,conditions,description,icon,severerisk,aqius,pm2p5');
@@ -127,11 +127,11 @@ class WeatherService extends BaseService {
         zip,
         location,
         current: {
-          temp_f: current.temp,
-          feels_like_f: current.feelslike,
+          temp_c: current.temp,
+          feels_like_c: current.feelslike,
           humidity: current.humidity,
-          pressure_in: current.pressure,
-          wind_mph: current.windspeed,
+          pressure_mb: current.pressure,
+          wind_kph: current.windspeed,
           wind_dir: current.winddir,
           condition: current.conditions,
           pm2_5: current.pm2p5, // PM2.5 particulate matter
@@ -141,18 +141,18 @@ class WeatherService extends BaseService {
           return {
             date: day.datetime,
             day_of_week: getDayOfWeek(day.datetime),
-            high_f: day.tempmax,
-            low_f: day.tempmin,
+            high_c: day.tempmax,
+            low_c: day.tempmin,
             condition: day.conditions,
             rain_chance: day.precipprob,
-            precip_in: day.precip,
+            precip_mm: day.precip,
             avghumidity: day.humidity,
             hour: (day.hours || []).map(h => ({
               time: h.datetime,
-              temp_f: h.temp,
+              temp_c: h.temp,
               condition: h.conditions,
               rain_chance: h.precipprob,
-              wind_mph: h.windspeed,
+              wind_kph: h.windspeed,
             })),
           };
         }),
@@ -179,16 +179,16 @@ class WeatherService extends BaseService {
         region: loc.location.region,
         country: loc.location.country,
         zip_code: loc.zip,
-        current_temp: Math.round(Number(loc.current.temp_f || 0)),
-        high: Math.round(Number(today?.high_f || 0)),
-        low: Math.round(Number(today?.low_f || 0)),
+        current_temp: Math.round(Number(loc.current.temp_c || 0)),
+        high: Math.round(Number(today?.high_c || 0)),
+        low: Math.round(Number(today?.low_c || 0)),
         icon,
         condition,
         rain_chance: Number(today?.rain_chance || 0),
         // Current conditions data (used as fallback if Ambient Weather unavailable)
         humidity: Math.round(Number(loc.current.humidity || 0)),
-        pressure: Math.round(Number(loc.current.pressure_in || 0) * 100) / 100,
-        wind_mph: Math.round(Number(loc.current.wind_mph || 0) * 10) / 10,
+        pressure: Math.round(Number(loc.current.pressure_mb || 0) * 100) / 100,
+        wind_kph: Math.round(Number(loc.current.wind_kph || 0) * 10) / 10,
         wind_dir: loc.current.wind_dir || 0,
       };
     });
@@ -199,8 +199,8 @@ class WeatherService extends BaseService {
       return {
         date: day.date,
         day: day.day_of_week,
-        high: Math.round(Number(day.high_f || 0)),
-        low: Math.round(Number(day.low_f || 0)),
+        high: Math.round(Number(day.high_c || 0)),
+        low: Math.round(Number(day.low_c || 0)),
         icon,
         rain_chance: Number(day.rain_chance || 0),
       };
@@ -228,9 +228,9 @@ class WeatherService extends BaseService {
     const { phase, direction } = this.mapMoonPhase(mainLocation.astro.moon_phase);
 
     // Precipitation totals
-    const total24h = mainLocation.forecast[0]?.precip_in || 0;
+    const total24h = mainLocation.forecast[0]?.precip_mm || 0;
     const weekTotal = mainLocation.forecast.slice(0, 7).reduce(
-      (sum, d) => sum + Number(d.precip_in || 0), 0
+      (sum, d) => sum + Number(d.precip_mm || 0), 0
     );
 
     return {
@@ -249,9 +249,9 @@ class WeatherService extends BaseService {
       },
       air_quality: aqi != null ? { aqi, category: aqiCategory } : { aqi: null, category: 'Unknown' },
       precipitation: {
-        last_24h_in: Number(total24h.toFixed(2)),
-        week_total_in: Number(weekTotal.toFixed(2)),
-        year_total_in: null,
+        last_24h_mm: Number(total24h.toFixed(2)),
+        week_total_mm: Number(weekTotal.toFixed(2)),
+        year_total_mm: null,
       },
     };
   }
@@ -282,11 +282,11 @@ class WeatherService extends BaseService {
         
         hourlyData.push({
           time: `${hourNum} ${ampm}`,
-          temp_f: Math.round(Number(hourData.temp_f || 0)),
+          temp_c: Math.round(Number(hourData.temp_c || 0)),
           condition: hourData.condition || 'Unknown',
           icon,
           rain_chance: Number(hourData.rain_chance || 0),
-          wind_mph: Math.round(Number(hourData.wind_mph || 0)),
+          wind_kph: Math.round(Number(hourData.wind_kph || 0)),
         });
       }
     }

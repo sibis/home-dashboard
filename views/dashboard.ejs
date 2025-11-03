@@ -396,17 +396,17 @@
             <div class="dot-leader">
               <span class="label">24h</span>
               <span class="dots"></span>
-              <span class="value"><%= precipitation && precipitation.last_24h_in !== null ? precipitation.last_24h_in.toFixed(2) : '0.00' %>"</span>
+              <span class="value"><%= precipitation && precipitation.last_24h_mm !== null ? precipitation.last_24h_mm.toFixed(1) : '0.0' %>mm</span>
             </div>
             <div class="dot-leader">
               <span class="label">7d</span>
               <span class="dots"></span>
-              <span class="value"><%= precipitation && precipitation.week_total_in !== null ? precipitation.week_total_in.toFixed(2) : '0.00' %>"</span>
+              <span class="value"><%= precipitation && precipitation.week_total_mm !== null ? precipitation.week_total_mm.toFixed(1) : '0.0' %>mm</span>
             </div>
             <div class="dot-leader">
               <span class="label">YTD</span>
               <span class="dots"></span>
-              <span class="value"><%= precipitation && precipitation.year_total_in !== null ? precipitation.year_total_in.toFixed(2) : '0.00' %>"</span>
+              <span class="value"><%= precipitation && precipitation.year_total_mm !== null ? precipitation.year_total_mm.toFixed(1) : '0.0' %>mm</span>
             </div>
           </div>
         </div>
@@ -416,7 +416,7 @@
         </div>
         <div class="stat">
           <i class="icon ph-bold ph-wind"></i>
-          <%= wind.speed_mph %>mph
+          <%= wind.speed_kph %>km/h
         </div>
         <div class="stat">
           <div class="moon-icon">
