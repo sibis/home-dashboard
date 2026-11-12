@@ -45,8 +45,9 @@ VISUAL_CROSSING_API_KEY=your_key_here
 ```
 
 **Required:**
-- `MAIN_LOCATION_ZIP` - Your primary 5-digit US ZIP code
+- `MAIN_LOCATION_ZIP` - Your primary location: a US ZIP code, or a city name like `Burnaby, BC, Canada`
 - `VISUAL_CROSSING_API_KEY` - Weather forecast API key (see below)
+- `TIMEZONE` (optional) - IANA timezone override for the clock and calendar, e.g. `Etc/GMT+7` for BC (permanent UTC-7 since 2026)
 
 **Optional:**
 - `ADDITIONAL_LOCATION_ZIPS` - Up to 3 additional ZIP codes (comma-separated)

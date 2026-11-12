@@ -27,7 +27,7 @@ class WeatherService extends BaseService {
     // Visual Crossing uses location/next{days}days format for forecast
     const url = new URL(`https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${encodeURIComponent(zip)}/next${days}days`);
     url.searchParams.set('key', apiKey);
-    url.searchParams.set('unitGroup', 'us'); // Use US units (Fahrenheit, mph, inches)
+    url.searchParams.set('unitGroup', 'metric'); // Metric units (Celsius, km/h, mm). Field names like temp_f are legacy and now hold °C
     url.searchParams.set('include', 'days,hours,current,alerts');
     // Include air quality elements: aqius (US EPA AQI) and pm2p5 (PM2.5)
     url.searchParams.set('elements', 'datetime,tempmax,tempmin,temp,feelslike,feelslikemax,feelslikemin,humidity,precip,precipprob,preciptype,snow,snowdepth,windspeed,winddir,pressure,cloudcover,visibility,solarradiation,solarenergy,uvindex,sunrise,sunset,moonphase,conditions,description,icon,severerisk,aqius,pm2p5');
@@ -227,12 +227,6 @@ class WeatherService extends BaseService {
     // Moon phase mapping
     const { phase, direction } = this.mapMoonPhase(mainLocation.astro.moon_phase);
 
-    // Precipitation totals
-    const total24h = mainLocation.forecast[0]?.precip_in || 0;
-    const weekTotal = mainLocation.forecast.slice(0, 7).reduce(
-      (sum, d) => sum + Number(d.precip_in || 0), 0
-    );
-
     return {
       locations,
       forecast,
@@ -248,11 +242,6 @@ class WeatherService extends BaseService {
         illumination: mainLocation.astro.moon_illumination ? Number(mainLocation.astro.moon_illumination) : null,
       },
       air_quality: aqi != null ? { aqi, category: aqiCategory } : { aqi: null, category: 'Unknown' },
-      precipitation: {
-        last_24h_in: Number(total24h.toFixed(2)),
-        week_total_in: Number(weekTotal.toFixed(2)),
-        year_total_in: null,
-      },
     };
   }
 

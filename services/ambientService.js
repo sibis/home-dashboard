@@ -123,7 +123,6 @@ class AmbientService extends BaseService {
     const windSpeedMph = Number(apiData.windspeedmph) || 0;
     const windDir = apiData.winddir || 0;
     const pressureInHg = Number(apiData.baromrelin || apiData.baromabsin) || 0;
-    const rainRate = Number(apiData.rainratein) || 0;
     const solarRadiation = Number(apiData.solarradiation) || 0;
 
     const windDirection = getWindDirection(windDir);
@@ -136,12 +135,6 @@ class AmbientService extends BaseService {
       wind: {
         speed_mph: Math.round(windSpeedMph * 10) / 10,
         direction: windDirection,
-      },
-      precipitation: {
-        last_24h_in: Math.round(Number(apiData.dailyrainin || 0) * 100) / 100,
-        week_total_in: Math.round(Number(apiData.weeklyrainin || 0) * 100) / 100,
-        month_total_in: Math.round(Number(apiData.monthlyrainin || 0) * 100) / 100,
-        year_total_in: Math.round(Number(apiData.yearlyrainin || 0) * 100) / 100,
       },
     };
   }

@@ -183,9 +183,11 @@ body {
 ---------------------------- */
 .footer {
   display: grid;
-  grid-template-columns: 1fr 260px;
-  gap: 16px;
+  /* Calendar events only: three columns x two rows, up to 6 events */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 24px;
   margin-top: 28px;
+  padding: 0 12px;
 }
 
 .weather-stats {

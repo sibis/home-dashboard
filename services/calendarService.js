@@ -91,7 +91,8 @@ class CalendarService extends BaseService {
     const timeMin = now.toISOString();
     const timeMax = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
 
-    const events = [];
+    // Events keyed by title + start time so the same event on several calendars is kept once
+    const eventMap = new Map();
     for (const calId of calendarIds) {
       try {
         const res = await calendar.events.list({
@@ -117,19 +118,30 @@ class CalendarService extends BaseService {
           const days = diffMs / (1000 * 60 * 60 * 24);
           if (days < 0 || days > 7) continue;
 
-          events.push({
-            title: ev.summary || 'Untitled',
-            start,
-            startDate,
-          });
+          const title = ev.summary || 'Untitled';
+          const key = `${title.trim().toLowerCase()}|${startDate.getTime()}`;
+          const existing = eventMap.get(key);
+          if (existing) {
+            existing.calendars.add(calId);
+          } else {
+            eventMap.set(key, { title, start, startDate, calendars: new Set([calId]) });
+          }
         }
       } catch (e) {
         logger.warn?.(`[Calendar] Failed to fetch events for ${calId}: ${e.message}`);
       }
     }
 
+    // Events on only one calendar get that calendar's first letter, e.g. "Coffee (s)".
+    // Events shared across calendars are shown once with no tag.
+    const events = [...eventMap.values()].map(ev => {
+      if (ev.calendars.size !== 1) return ev;
+      const [calId] = ev.calendars;
+      return { ...ev, title: `${ev.title} (${calId.charAt(0).toLowerCase()})` };
+    });
+
     events.sort((a, b) => a.startDate - b.startDate);
-    return { events: events.slice(0, 2), timezone };
+    return { events: events.slice(0, 6), timezone };
   }
 
   mapToDashboard(apiData, config) {

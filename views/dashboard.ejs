@@ -24,25 +24,24 @@
 </head>
 <body>
   <%
+    // Format in the weather location's timezone (not the server's) so the clock is right on any host
+    const tz = typeof timezone !== 'undefined' && timezone ? timezone : undefined;
     const formatDate = (date) => {
       const d = new Date(date);
-      const days = ['Sun', 'Mon', 'Tues', 'Weds', 'Thurs', 'Fri', 'Sat'];
-      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
-      const dayName = days[d.getDay()];
-      const month = months[d.getMonth()];
-      const day = d.getDate();
-      const year = d.getFullYear();
+      const parts = Object.fromEntries(
+        new Intl.DateTimeFormat('en-US', { timeZone: tz, weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })
+          .formatToParts(d).map(p => [p.type, p.value])
+      );
+      const days = { Sun: 'Sun', Mon: 'Mon', Tue: 'Tues', Wed: 'Weds', Thu: 'Thurs', Fri: 'Fri', Sat: 'Sat' };
+      const day = Number(parts.day);
       const suffix = day === 1 || day === 21 || day === 31 ? 'st' : day === 2 || day === 22 ? 'nd' : day === 3 || day === 23 ? 'rd' : 'th';
-      return `${dayName} ${month} ${day}${suffix}, ${year}`;
+      return `${days[parts.weekday]} ${parts.month === 'Sep' ? 'Sept' : parts.month} ${day}${suffix}, ${parts.year}`;
     };
     
     const formatTime = (date) => {
-      const d = new Date(date);
-      let hours = d.getHours();
-      const minutes = d.getMinutes();
-      const ampm = hours >= 12 ? 'pm' : 'am';
-      hours = hours % 12 || 12;
-      return `${hours}:${minutes.toString().padStart(2, '0')}${ampm}`;
+      return new Date(date)
+        .toLocaleTimeString('en-US', { timeZone: tz, hour: 'numeric', minute: '2-digit' })
+        .replace(/\s/g, '').toLowerCase();
     };
     
     
@@ -388,97 +387,16 @@
   </div>
   
   <div class="footer">
-    <div>
-      <div class="weather-stats">
-        <div class="stat">
-          <i class="icon ph-bold ph-rainbow-cloud"></i>
-          <div>
-            <div class="dot-leader">
-              <span class="label">24h</span>
-              <span class="dots"></span>
-              <span class="value"><%= precipitation && precipitation.last_24h_in !== null ? precipitation.last_24h_in.toFixed(2) : '0.00' %>"</span>
-            </div>
-            <div class="dot-leader">
-              <span class="label">7d</span>
-              <span class="dots"></span>
-              <span class="value"><%= precipitation && precipitation.week_total_in !== null ? precipitation.week_total_in.toFixed(2) : '0.00' %>"</span>
-            </div>
-            <div class="dot-leader">
-              <span class="label">YTD</span>
-              <span class="dots"></span>
-              <span class="value"><%= precipitation && precipitation.year_total_in !== null ? precipitation.year_total_in.toFixed(2) : '0.00' %>"</span>
-            </div>
-          </div>
-        </div>
-        <div class="stat">
-          <i class="icon ph-bold ph-drop-half-bottom"></i>
-          <%= humidity %>%
-        </div>
-        <div class="stat">
-          <i class="icon ph-bold ph-wind"></i>
-          <%= wind.speed_mph %>mph
-        </div>
-        <div class="stat">
-          <div class="moon-icon">
-            <%- getMoonPhaseSVG(moon.phase, moon.direction, moon.illumination) %>
-          </div>
-          <div class="text-label">
-            <% const phaseParts = moon.phase.split('_'); %>
-            <% phaseParts.forEach((part, i) => { %>
-              <%= part %><% if (i < phaseParts.length - 1) { %><br/><% } %>
-            <% }); %>
-          </div>
-        </div>
-        <div class="stat">
-          <i class="icon ph-bold ph-face-mask"></i>
-          <div class="aqi-pill text-label"><%= air_quality.aqi %></div>
-        </div>
+    <% if (calendar_events && calendar_events.length > 0) { %>
+      <% calendar_events.slice(0, 6).forEach(function(event) { %>
+      <div class="calendar-event text-sm">
+        <strong><%= event.title %></strong>
+        <div><%= event.time %></div>
       </div>
-      
-      <% if (vehicles && vehicles.length > 0) { %>
-      <div class="vehicles">
-        <% vehicles.slice(0, 2).forEach(function(vehicle) { %>
-        <div class="flex items-center" style="gap: 12px">
-          <% if (vehicle.make) { %>
-            <% const brandLower = vehicle.make.trim().toLowerCase().replace(/\s+/g, '-'); %>
-            <% const logoPath = `/assets/vehicle-logo/${brandLower}.png`; %>
-            <div>
-              <img 
-                src="<%= logoPath %>" 
-                alt="<%= vehicle.make %>" 
-                width="40" 
-                height="40" 
-                style="display: block;"
-                onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
-              >
-              <span style="display: none; height: 40px; align-items: center;" class="text-sm"><%= vehicle.make %></span>
-            </div>
-          <% } else { %>
-            <div style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">
-              <i class="ph-bold ph-car" style="font-size: 24px;"></i>
-            </div>
-          <% } %>
-          <div>
-            <%= vehicle.percent %>%<div class="slash"></div><%= Math.round(vehicle.range_miles) %>mi
-          </div>
-        </div>
-        <% }); %>
-      </div>
-      <% } %>
-    </div>
-    
-    <div class="flex flex-col" style="gap: 16px;">
-      <% if (calendar_events && calendar_events.length > 0) { %>
-        <% calendar_events.slice(0, 4).forEach(function(event) { %>
-        <div class="calendar-event text-sm">
-            <strong><%= event.title %></strong>
-            <div><%= event.time %></div>
-        </div>
-        <% }); %>
-      <% } else { %>
-        <div class="calendar-empty">No upcoming events</div>
-      <% } %>
-    </div>
+      <% }); %>
+    <% } else { %>
+      <div class="calendar-empty">No upcoming events</div>
+    <% } %>
   </div>
 </body>
 </html>
