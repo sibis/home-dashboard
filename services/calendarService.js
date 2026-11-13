@@ -3,6 +3,11 @@ const { google } = require('googleapis');
 const { BaseService } = require('../lib/BaseService');
 const { AUTH_PATH } = require('../lib/paths');
 
+// Look this far ahead so there are enough events to fill the dashboard even in quiet weeks
+const LOOKAHEAD_DAYS = 30;
+const MAX_EVENTS_PER_CALENDAR = 20;
+const MAX_EVENTS_SHOWN = 6;
+
 /**
  * Calendar Service (Google Calendar) - OPTIONAL
  * Provides upcoming calendar events
@@ -89,7 +94,7 @@ class CalendarService extends BaseService {
 
     const now = new Date();
     const timeMin = now.toISOString();
-    const timeMax = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    const timeMax = new Date(now.getTime() + LOOKAHEAD_DAYS * 24 * 60 * 60 * 1000).toISOString();
 
     // Events keyed by title + start time so the same event on several calendars is kept once
     const eventMap = new Map();
@@ -99,7 +104,7 @@ class CalendarService extends BaseService {
           calendarId: calId,
           timeMin,
           timeMax,
-          maxResults: 10,
+          maxResults: MAX_EVENTS_PER_CALENDAR,
           singleEvents: true,
           orderBy: 'startTime',
           timeZone: timezone,
@@ -113,10 +118,8 @@ class CalendarService extends BaseService {
           const start = ev.start.dateTime || ev.start.date;
           const startDate = new Date(start);
           
-          // Only include events within next 7 days
-          const diffMs = startDate - now;
-          const days = diffMs / (1000 * 60 * 60 * 24);
-          if (days < 0 || days > 7) continue;
+          // Only include events that haven't started yet (the API already limits the upper bound)
+          if (startDate < now) continue;
 
           const title = ev.summary || 'Untitled';
           const key = `${title.trim().toLowerCase()}|${startDate.getTime()}`;
@@ -141,7 +144,7 @@ class CalendarService extends BaseService {
     });
 
     events.sort((a, b) => a.startDate - b.startDate);
-    return { events: events.slice(0, 6), timezone };
+    return { events: events.slice(0, MAX_EVENTS_SHOWN), timezone };
   }
 
   mapToDashboard(apiData, config) {
@@ -170,8 +173,9 @@ class CalendarService extends BaseService {
     const diffDays = Math.round((target - now) / (1000 * 60 * 60 * 24));
     if (diffDays > 0 && diffDays <= 7) return `In ${diffDays} days at ${timeStr}`;
     
-    const weekday = target.toLocaleDateString('en-US', { weekday: 'long', timeZone: tz });
-    return `${weekday} at ${timeStr}`;
+    // Further out than a week: show the date, e.g. "Mon, Dec 1 at 4:30 pm"
+    const dayLabel = target.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', timeZone: tz });
+    return `${dayLabel} at ${timeStr}`;
   }
 }
 

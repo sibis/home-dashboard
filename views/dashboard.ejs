@@ -368,21 +368,20 @@
       </div>
     </div>
     
-    <div class="flex flex-col" style="justify-content: space-between">
-      <% 
-      // Show up to 3 additional locations (indices 1, 2, and 3)
-      for (let i = 1; i <= 3; i++) {
-        if (i < locations.length) {
-      %>
-      <div class="flex items-center text-label">
-        <div class="flex-1"><%= locations[i].name %></div>
-        <i class="ph-bold icon-sm <%= getWeatherIcon(locations[i].icon, false) %>" style="margin-right: 6px;"></i>
-        <%= Math.round(locations[i].current_temp) %>°
+    <div class="tasks">
+      <div class="tasks-row tasks-head text-label-sm">
+        <div>Family tasks</div><div>Left</div><div>Done</div>
       </div>
-      <%
-        }
-      }
-      %>
+      <% tasks.people.forEach(function(person) { %>
+      <div class="tasks-row">
+        <div class="tasks-name"><%= person.name %></div>
+        <div><span class="tasks-count"><%= person.left %></span></div>
+        <div><i class="ph-bold ph-check icon-xs"></i> <%= person.done %></div>
+      </div>
+      <% }); %>
+      <% if (tasks.next) { %>
+      <div class="tasks-next">Next: <%= tasks.next %></div>
+      <% } %>
     </div>
   </div>
   
@@ -395,7 +394,7 @@
       </div>
       <% }); %>
     <% } else { %>
-      <div class="calendar-empty">No upcoming events</div>
+      <div class="calendar-empty">No scheduled events</div>
     <% } %>
   </div>
 </body>

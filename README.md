@@ -132,6 +132,13 @@ Display upcoming calendar events.
    ```
 8. Visit `http://localhost:7272/admin` and click "Connect Google Calendar"
 
+### Family Tasks (Optional, no API key)
+A shared to-do list shown on the dashboard. Open `http://<server-ip>:7272/tasks` on each phone (and add it to the home screen) to add, check off, or delete tasks. Tasks are stored in `data/tasks.json`.
+
+- `TASK_PEOPLE` - Comma-separated owners, max 3 (default `Sibi,Partner,Shared`)
+- The page has no login, so keep the server on your home network (don't expose the port to the internet).
+- The display picks up changes on its next refresh (every ~10 minutes).
+
 ### Smartcar API (Optional)
 Vehicle battery/fuel level and range information for supported vehicles.
 

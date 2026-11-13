@@ -6,6 +6,7 @@ const { applyMiddleware } = require('./lib/middleware');
 const { isAuthed } = require('./services/calendarService');
 const adminRoutes = require('./routes/admin');
 const dashboardRoutes = require('./routes/dashboard');
+const taskRoutes = require('./routes/tasks');
 
 const app = express();
 const PORT = process.env.PORT || 7272;
@@ -40,6 +41,7 @@ applyMiddleware(app);
 // Mount route modules
 app.use('/', adminRoutes);
 app.use('/', dashboardRoutes);
+app.use('/', taskRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -63,6 +65,7 @@ app.listen(PORT, '0.0.0.0', () => {
   
   console.log(`Dashboard page: ${baseUrl}/dashboard`);
   console.log(`Admin page: ${baseUrl}/admin`);
+  console.log(`Family tasks page: ${baseUrl}/tasks`);
 });
 
 module.exports = app; // For testing

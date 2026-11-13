@@ -150,6 +150,60 @@ body {
   padding-right: 16px;
 }
 
+/* Family tasks (last column of the weather row) */
+.main-weather > .tasks {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  /* Match the weight and spacing of .text-sm used elsewhere */
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.25px;
+  line-height: 1.2;
+}
+
+.tasks-row {
+  display: grid;
+  grid-template-columns: 1fr 38px 38px;
+  align-items: center;
+}
+
+.tasks-head {
+  text-transform: uppercase;
+}
+
+.tasks-head > :not(:first-child),
+.tasks-row > :not(:first-child) {
+  text-align: center;
+}
+
+.tasks-name {
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tasks-count {
+  display: inline-block;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 8px;
+  background: #000;
+  color: #fff;
+  font-weight: 700;
+}
+
+.tasks-next {
+  border-top: 1px solid #000;
+  padding-top: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* 5 Day Forecast */
 .forecast-graph {
   display: flex;
@@ -290,6 +344,7 @@ body {
 }
 
 .calendar-empty {
+  grid-column: 1 / -1; /* Span the whole footer grid */
   padding: 32px 0;
   text-align: center;
   border: 1px dashed #000000;
