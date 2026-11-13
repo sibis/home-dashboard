@@ -64,6 +64,15 @@ npm run logs   # View live logs
 
 The server runs on **port 7272** by default via PM2 process manager.
 
+### Run with Docker (alternative to PM2)
+```bash
+cp .env <nas>/home-dashboard/.env   # your config, including TIMEZONE
+mkdir -p data && chown 1000:1000 data   # use your own PUID/PGID if different
+docker compose up -d --build
+docker compose logs -f
+```
+The `data/` folder is mounted into the container and holds tokens, tasks and cache. Google sign-in only works on `localhost`, so sign in on your computer first, then copy `data/auth.json` to the NAS.
+
 ### 4. Enable Auto-Start on Boot (Optional)
 
 To have the dashboard automatically start when your server reboots:

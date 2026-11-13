@@ -1,0 +1,15 @@
+services:
+  dashboard:
+    build: .
+    container_name: home-dashboard
+    restart: unless-stopped
+    init: true                      # Reaps leftover Chromium processes
+    ports:
+      - "7272:7272"                 # host:container. Use this host port in the Arduino sketch
+    env_file: .env                  # API keys, locations, TIMEZONE, TASK_PEOPLE
+    environment:
+      TZ: Etc/GMT+7                 # BC time (permanent UTC-7)
+    # Run as the user that owns ./data on the NAS (find yours with `id`)
+    user: "${PUID:-1000}:${PGID:-1000}"
+    volumes:
+      - ./data:/app/data            # Persists state.json, tasks.json and auth.json (Google sign-in)

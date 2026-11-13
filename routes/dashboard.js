@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const { buildDashboardData } = require('../lib/dataBuilder');
-const { getBaseUrl } = require('../lib/utils');
 const { setStateKey } = require('../lib/state');
 
 const router = express.Router();
@@ -61,8 +60,9 @@ router.get('/dashboard/image', async (req, res) => {
   try {
     const puppeteer = require('puppeteer');
     const sharp = require('sharp');
-    const baseUrl = getBaseUrl(req);
-    
+    // Render via loopback so it works inside Docker no matter what host the display used to reach us
+    const baseUrl = `http://127.0.0.1:${process.env.PORT || 7272}`;
+
     // Get display dimensions from env
     const displayWidth = parseInt(process.env.DISPLAY_WIDTH || '800', 10);
     const displayHeight = parseInt(process.env.DISPLAY_HEIGHT || '480', 10);
